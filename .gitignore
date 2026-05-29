@@ -1,0 +1,65 @@
+# --- Secrets: never commit ---
+.moodle_token
+*.token
+mpdl.ini
+.env
+.env.*
+
+# --- Downloaded media & run state ---
+downloads/
+*.mp4
+*.m4a
+*.mkv
+*.webm
+.downloaded.txt
+downloaded.txt
+urls_*.txt
+*.log
+
+# --- Python: byte-compiled / caches ---
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.dmypy.json
+
+# --- Python: packaging / build ---
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+wheels/
+pip-wheel-metadata/
+
+# --- Python: virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Test & coverage ---
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# --- OS cruft ---
+.DS_Store
+.AppleDouble
+.LSOverride
+__MACOSX/
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Editors / IDEs ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

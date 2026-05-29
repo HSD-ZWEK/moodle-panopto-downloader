@@ -1,0 +1,12 @@
+{
+  "sitename": "Demo University",
+  "fullname": "Test User",
+  "release": "4.1.2 (Build: 20230313)",
+  "userid": 7,
+  "functions": [
+    {"name": "core_webservice_get_site_info"},
+    {"name": "core_course_get_contents"},
+    {"name": "mod_lti_get_ltis_by_courses"},
+    {"name": "core_enrol_get_users_courses"}
+  ]
+}

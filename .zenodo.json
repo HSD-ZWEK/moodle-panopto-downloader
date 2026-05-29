@@ -1,0 +1,34 @@
+{
+  "title": "moodle-panopto-downloader",
+  "description": "A command-line tool for discovering and downloading Panopto videos embedded in Moodle courses via the official Moodle Web Services API. Developed at Hochschule Düsseldorf by ZWEK within the KIVi-Azubi research project.",
+  "upload_type": "software",
+  "license": "GPL-3.0-or-later",
+  "access_right": "open",
+  "communities": [
+    { "identifier": "kivi-azubi" }
+  ],
+  "creators": [
+    {
+      "name": "Steier, Christian-Maximilian",
+      "orcid": "0000-0001-7946-0461",
+      "affiliation": "ZWEK – Centre for Training and Competence Development, Hochschule Düsseldorf – University of Applied Sciences"
+    }
+  ],
+  "keywords": [
+    "moodle",
+    "panopto",
+    "video-download",
+    "higher-education",
+    "educational-technology",
+    "research-software",
+    "python",
+    "learning-management-system"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "scheme": "url",
+      "identifier": "https://github.com/HSD-ZWEK/moodle-panopto-downloader"
+    }
+  ]
+}

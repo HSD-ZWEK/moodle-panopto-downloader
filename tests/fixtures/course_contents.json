@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Introduction",
+    "modules": [
+      {
+        "id": 11,
+        "name": "Lecture 1 (video)",
+        "modname": "url",
+        "contents": [
+          {
+            "type": "url",
+            "fileurl": "https://demo.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=11111111-1111-1111-1111-111111111111"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "name": "All recordings",
+        "modname": "label",
+        "description": "<p>See <a href=\"https://demo.cloud.panopto.eu/Panopto/Pages/Sessions/List.aspx?folderID=22222222-2222-2222-2222-222222222222\">the folder</a>.</p>"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Further material",
+    "modules": [
+      {
+        "id": 21,
+        "name": "Embedded recording",
+        "modname": "page",
+        "description": "<iframe src=\"https://demo.cloud.panopto.eu/Panopto/Pages/Embed.aspx?id=33333333-3333-3333-3333-333333333333&v=1\"></iframe>"
+      },
+      {
+        "id": 22,
+        "name": "Panopto (external tool)",
+        "modname": "lti"
+      },
+      {
+        "id": 23,
+        "name": "Lecture slides",
+        "modname": "resource",
+        "contents": [
+          {"type": "file", "filename": "slides.pdf", "fileurl": "https://moodle.example.edu/pluginfile.php/1/slides.pdf"}
+        ]
+      }
+    ]
+  }
+]

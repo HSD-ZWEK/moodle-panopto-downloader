@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata in this file."
+title: "moodle-panopto-downloader"
+abstract: >-
+  A command-line tool for discovering and downloading Panopto videos embedded in
+  Moodle courses via the official Moodle Web Services API. It supports individual
+  videos and folder-based content structures and is designed to work across many
+  Moodle versions and institutions.
+type: software
+authors:
+  - family-names: "Steier"
+    given-names: "Christian-Maximilian"
+    affiliation: "ZWEK – Centre for Training and Competence Development, Hochschule Düsseldorf – University of Applied Sciences"
+    orcid: "https://orcid.org/0000-0001-7946-0461"
+license: GPL-3.0-or-later
+version: "1.0.0"
+date-released: "2026-05-29"
+repository-code: "https://github.com/HSD-ZWEK/moodle-panopto-downloader"
+url: "https://github.com/HSD-ZWEK/moodle-panopto-downloader"
+keywords:
+  - moodle
+  - panopto
+  - video-download
+  - higher-education
+  - educational-technology
+  - research-software
+  - python
+  - learning-management-system
+# After archiving a release on Zenodo, add the minted DOI(s) here, e.g.:
+# identifiers:
+#   - type: doi
+#     value: "10.5281/zenodo.0000000"
+#     description: "Concept DOI (all versions)"

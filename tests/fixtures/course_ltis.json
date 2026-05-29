@@ -1,0 +1,12 @@
+{
+  "ltis": [
+    {
+      "id": 22,
+      "course": 210,
+      "name": "Panopto",
+      "launchcontainer": 1,
+      "toolurl": "https://demo.cloud.panopto.eu/Panopto/Pages/Sessions/List.aspx?folderID=44444444-4444-4444-4444-444444444444"
+    }
+  ],
+  "warnings": []
+}
