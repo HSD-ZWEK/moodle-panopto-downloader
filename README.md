@@ -9,6 +9,14 @@
 Moodle Panopto Downloader is a command-line tool for discovering and downloading
 Panopto videos embedded in Moodle courses using the Moodle Web Services API.
 
+> **Disclaimer.** This tool is intended for Panopto recordings that the operator is
+> authorized to access and permitted to download — for example, when Panopto's download
+> setting is enabled and the operator or their institution holds the rights to the
+> recordings. It uses the official Moodle Web Services API together with the operator's
+> own credentials and does not bypass authentication or any technical protection measure.
+> Use is at the operator's own responsibility and subject to the applicable terms of use,
+> copyright, and data protection rules.
+
 ## Overview
 
 The tool queries a Moodle server with an access token, identifies the Panopto
@@ -216,8 +224,9 @@ moodle-panopto-downloader 210 --since 2024-10-01
 ## Privacy and Legal Considerations
 
 The tool does not bypass authentication; it uses only access that the executing person
-already legitimately holds. Use is limited to servers and content for which an access
-authorization exists.
+already legitimately holds. Use is limited to servers and content for which both an
+access authorization and a download permission exist — for example, where the Panopto
+download setting is enabled and the relevant rights are held.
 
 Downloaded videos are subject to the copyright and terms of use of the respective
 institution. For recordings that contain identifiable persons, the applicable data
