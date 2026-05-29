@@ -269,17 +269,6 @@ Forschungsdatenmanagement mit stabilen Referenzen auf die analysierten Medien.
 Autorenschaft und Herkunft sind in [`CITATION.cff`](CITATION.cff) und
 [`AUTHORS.md`](AUTHORS.md) dokumentiert.
 
-## Mitwirken
-
-Hinweise zu Entwicklungsumgebung, Tests und Pull Requests stehen in
-[`CONTRIBUTING.md`](CONTRIBUTING.md). Kurzfassung:
-
-```bash
-pip install -e ".[dev]"
-pytest
-ruff check .
-```
-
 ## Zitation
 
 Die maschinenlesbaren Zitationsmetadaten liegen in [`CITATION.cff`](CITATION.cff),

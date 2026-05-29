@@ -265,17 +265,6 @@ references to the analysed media.
 Authorship and provenance are documented in [`CITATION.cff`](CITATION.cff) and
 [`AUTHORS.md`](AUTHORS.md).
 
-## Contributing
-
-Notes on the development environment, tests and pull requests are provided in
-[`CONTRIBUTING.md`](CONTRIBUTING.md). Short form:
-
-```bash
-pip install -e ".[dev]"
-pytest
-ruff check .
-```
-
 ## Citation
 
 Machine-readable citation metadata are provided in [`CITATION.cff`](CITATION.cff),
