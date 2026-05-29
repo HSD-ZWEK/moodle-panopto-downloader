@@ -155,6 +155,7 @@ Downloading requires an authenticated Panopto session. Two methods are available
 | `--since DATE` | Only download videos uploaded on/after DATE (`YYYY-MM-DD`); passed to yt-dlp. |
 | `--write-urls FILE` | Write the discovered URLs to a file. |
 | `--out DIR` | Output directory (default `downloads`). |
+| `--id-filenames` | Name files by Panopto id (enables provenance for transcription tools). |
 | `--browser NAME` | Browser for the Panopto cookies. |
 | `--cookies-file PATH` | `cookies.txt` in Netscape format instead of a browser. |
 | `--panopto-host HOST` | Fallback host for bare-id links if detection fails. |

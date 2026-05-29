@@ -26,6 +26,17 @@ def test_command_contains_core_flags():
     assert cmd[-2:] == ["u1", "u2"]
 
 
+def test_output_template_title_vs_id():
+    out = cmd_output(build_command(["u"], _config()))
+    assert "%(title)s" in out
+    out_id = cmd_output(build_command(["u"], _config(id_filenames=True)))
+    assert "%(id)s" in out_id and "%(title)s" not in out_id
+
+
+def cmd_output(cmd):
+    return cmd[cmd.index("--output") + 1]
+
+
 def test_command_uses_browser_by_default():
     cmd = build_command(["u"], _config(browser="firefox"))
     assert "--cookies-from-browser" in cmd

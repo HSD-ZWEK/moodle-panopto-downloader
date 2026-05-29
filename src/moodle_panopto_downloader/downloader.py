@@ -24,6 +24,8 @@ from .utils import get_logger
 _log = get_logger()
 
 OUTPUT_TEMPLATE = "%(playlist_title|Single Videos)s/%(title)s.%(ext)s"
+# Names files by the Panopto session id, so transcripts can carry provenance back to it.
+OUTPUT_TEMPLATE_BY_ID = "%(playlist_title|Single Videos)s/%(id)s.%(ext)s"
 PROBE_TEMPLATE = (
     "%(playlist_title|Single Videos)s\t%(title)s\t%(duration_string)s\t%(filesize_approx)s"
 )
@@ -63,7 +65,7 @@ def build_command(urls: Sequence[str], config: Config, *, yt_dlp_path: str = "yt
         "--download-archive",
         str(config.archive),
         "--output",
-        f"{config.out_dir}/{OUTPUT_TEMPLATE}",
+        f"{config.out_dir}/{OUTPUT_TEMPLATE_BY_ID if config.id_filenames else OUTPUT_TEMPLATE}",
         "--restrict-filenames",
         "--concurrent-fragments",
         "4",

@@ -65,6 +65,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--write-urls", metavar="FILE", help="Write the discovered URLs to FILE.")
     parser.add_argument("--out", help="Download directory (default: downloads).")
+    parser.add_argument(
+        "--id-filenames",
+        action="store_true",
+        help="Name files by Panopto id (enables provenance for whisper-transcribe-de).",
+    )
     parser.add_argument("--browser", help="Browser to read Panopto cookies from.")
     parser.add_argument("--cookies-file", help="Netscape cookies.txt for Panopto cookies.")
     parser.add_argument("--panopto-host", help="Fallback Panopto host for bare-id links.")

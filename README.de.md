@@ -158,6 +158,7 @@ Verfügung:
 | `--since DATUM` | Nur Videos ab Upload-Datum laden (`JJJJ-MM-TT`); an yt-dlp übergeben. |
 | `--write-urls DATEI` | Gefundene URLs in eine Datei schreiben. |
 | `--out ORDNER` | Zielordner (Vorgabe `downloads`). |
+| `--id-filenames` | Dateien nach Panopto-ID benennen (Provenienz für Transkriptions-Tools). |
 | `--browser NAME` | Browser für die Panopto-Cookies. |
 | `--cookies-file PFAD` | `cookies.txt` im Netscape-Format statt eines Browsers. |
 | `--panopto-host HOST` | Ersatz-Host für reine ID-Links, falls die Erkennung fehlschlägt. |

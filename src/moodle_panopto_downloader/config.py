@@ -46,6 +46,7 @@ class Config:
     yt_dlp_args: str | None = None
     jobs: int = 4
     since: str | None = None
+    id_filenames: bool = False
 
     def __post_init__(self) -> None:
         self.base_url = self.base_url.rstrip("/")
@@ -153,4 +154,5 @@ def build_config(args: object, env: Mapping[str, str] | None = None) -> Config:
         yt_dlp_args=pick("yt_dlp_args", "yt_dlp_args"),
         jobs=jobs,
         since=pick("since", "since"),
+        id_filenames=bool(getattr(args, "id_filenames", False)),
     )
