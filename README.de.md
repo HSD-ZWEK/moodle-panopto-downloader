@@ -308,6 +308,12 @@ BibTeX:
 `version` und `date-released` in `CITATION.cff` sowie `version` und `doi` im
 BibTeX-Eintrag werden je Release aktualisiert.
 
+## KI-Einsatz
+
+Teile dieser Software wurden mit Unterstützung generativer KI-Werkzeuge entwickelt,
+überarbeitet und geprüft (2026). Alle Ergebnisse wurden vom Autor überprüft, getestet und
+validiert; die Verantwortung für die Software liegt allein beim Autor.
+
 ## Lizenz
 
 Veröffentlicht unter der [GNU General Public License v3.0 oder später](LICENSE). Als

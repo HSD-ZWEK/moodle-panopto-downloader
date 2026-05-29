@@ -304,6 +304,12 @@ BibTeX:
 `version` and `date-released` in `CITATION.cff`, and `version` and `doi` in the BibTeX
 entry, are updated for each release.
 
+## AI use
+
+Parts of this software were developed, refactored, and reviewed with the assistance of
+generative AI tools (2026). All output was reviewed, tested, and validated by the author,
+who takes sole responsibility for the software.
+
 ## License
 
 Released under the [GNU General Public License v3.0 or later](LICENSE). As a copyleft
