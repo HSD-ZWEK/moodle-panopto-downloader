@@ -10,10 +10,10 @@ Der Moodle Panopto Downloader ist ein Kommandozeilenwerkzeug zum Auffinden und
 Herunterladen von in Moodle-Kursen eingebetteten Panopto-Videos. Die Erkennung erfolgt
 über die Moodle-Webservice-API.
 
-> **Hinweis.** Dieses Werkzeug ist für Panopto-Aufzeichnungen gedacht, zu denen eine
-> Zugriffsberechtigung *und* eine Download-Erlaubnis besteht — etwa wenn die
-> Panopto-Download-Einstellung aktiviert ist und die ausführende Person bzw. ihre
-> Einrichtung die Rechte an den Aufzeichnungen hält. Es nutzt die offizielle
+> **Hinweis.** Dieses Werkzeug ist für Panopto-Aufzeichnungen gedacht, bei denen die
+> ausführende Person bzw. ihre Einrichtung die Rechte an den Aufzeichnungen hält und die
+> Zugriffsberechtigung mit Erlaubnis zum Download der Podcast-Version (MP4) besteht.
+> Es nutzt die offizielle
 > Moodle-Webservice-API zusammen mit den eigenen Zugangsdaten und umgeht weder die
 > Authentifizierung noch eine technische Schutzmaßnahme. Die Nutzung erfolgt in eigener
 > Verantwortung und unter Vorbehalt der geltenden Nutzungsbedingungen sowie des Urheber-
