@@ -90,6 +90,10 @@ eingebaute Dienst *Moodle Mobile* genügt). Die Berechtigung
 `moodle/webservice:createtoken` ist erforderlich; andernfalls erstellt die
 Moodle-Administration das Token. Das Token ist wie ein Passwort zu behandeln.
 
+Für ein **dediziertes Servicekonto mit minimalen Rechten** (für Administrator*innen
+empfohlen) siehe [`docs/moodle-web-services.md`](docs/moodle-web-services.md): genaue
+Funktionsliste, Sicherheitsbegründung, Einrichtung (Web-UI und CLI) sowie Testschritte.
+
 ## Konfiguration
 
 Jede Einstellung wird in folgender Reihenfolge aufgelöst:

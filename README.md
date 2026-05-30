@@ -88,6 +88,11 @@ own user account, on a service that contains the functions listed above (the bui
 is required; otherwise the Moodle administration creates the token. The token is to be
 treated like a password.
 
+For a **dedicated, least-privilege** service account and token (recommended for
+administrators), see [`docs/moodle-web-services.md`](docs/moodle-web-services.md): it lists
+the exact functions used, a security rationale, web-UI and CLI setup, and verification
+steps.
+
 ## Configuration
 
 Each setting is resolved in the following order:
