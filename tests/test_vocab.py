@@ -49,6 +49,12 @@ def test_captures_lowercase_technical_terms():
     assert "isochor" in terms
 
 
+def test_number_words_are_filtered():
+    terms = extract_terms(["Otto zwei drei vier Motor zwei drei Motor"])
+    assert "Motor" in terms and "Otto" in terms
+    assert not ({"zwei", "drei", "vier"} & set(terms))
+
+
 def test_extra_texts_are_included():
     terms = extract_terms({"name": "Kurs"}, extra_texts=["Adiabatengleichung Adiabatengleichung"])
     assert "Adiabatengleichung" in terms
