@@ -154,6 +154,7 @@ Downloading requires an authenticated Panopto session. Two methods are available
 | `--dry-run` | Resolve titles and approximate sizes via yt-dlp without downloading. |
 | `--since DATE` | Only download videos uploaded on/after DATE (`YYYY-MM-DD`); passed to yt-dlp. |
 | `--write-urls FILE` | Write the discovered URLs to a file. |
+| `--write-vocab FILE` | Derive a German domain vocabulary from the course(s) and write it to FILE. |
 | `--out DIR` | Output directory (default `downloads`). |
 | `--id-filenames` | Name files by Panopto id (enables provenance for transcription tools). |
 | `--browser NAME` | Browser for the Panopto cookies. |
@@ -194,7 +195,16 @@ moodle-panopto-downloader 210 --dry-run
 
 # Download only videos uploaded on or after a date:
 moodle-panopto-downloader 210 --since 2024-10-01
+
+# Download (id-named) and derive a course vocabulary in one step, then transcribe it
+# with the companion tool — biasing recognition towards the course's own terminology:
+moodle-panopto-downloader 210 --id-filenames --write-vocab vocab_210.txt --out videos
+whisper-transcribe-de ./videos --vocab vocab_210.txt --out transcripts
 ```
+
+The vocabulary is derived from the course itself (section/activity names, labels, page
+content, summaries), so transcription is tuned to *that course* rather than to a generic
+model — the point of using these tools for one's own Moodle courses.
 
 ### How it works
 

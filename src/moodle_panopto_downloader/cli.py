@@ -21,6 +21,7 @@ from .errors import MoodleAPIError, MoodlePanoptoError
 from .moodle import MoodleClient
 from .panopto import PanoptoLink, extract_links
 from .utils import configure_logging, get_logger
+from .vocab import extract_terms, render_vocab_file
 
 _log = get_logger()
 
@@ -64,6 +65,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Only download videos uploaded on/after DATE (YYYY-MM-DD); passed to yt-dlp.",
     )
     parser.add_argument("--write-urls", metavar="FILE", help="Write the discovered URLs to FILE.")
+    parser.add_argument(
+        "--write-vocab",
+        metavar="FILE",
+        help="Derive a German domain vocabulary from the course(s) and write it to FILE.",
+    )
     parser.add_argument("--out", help="Download directory (default: downloads).")
     parser.add_argument(
         "--id-filenames",
@@ -161,6 +167,25 @@ def links_to_json(links: Sequence[PanoptoLink]) -> str:
     )
 
 
+def _write_course_vocab(client: MoodleClient, course_ids: list[int], path: str) -> None:
+    """Derive a domain vocabulary from the courses' contents and write it to ``path``."""
+    terms: list[str] = []
+    seen: set[str] = set()
+    for cid in course_ids:
+        try:
+            contents = client.get_course_contents(cid)
+        except MoodlePanoptoError as exc:
+            _log.error("Vocabulary: course %s: %s", cid, exc)
+            continue
+        for term in extract_terms(contents):
+            key = term.casefold()
+            if key not in seen:
+                seen.add(key)
+                terms.append(term)
+    Path(path).write_text(render_vocab_file(terms, course_ids), encoding="utf-8")
+    _log.info("Derived %d vocabulary term(s) → %s", len(terms), path)
+
+
 def run(args: argparse.Namespace) -> int:
     """Execute a configured run. Returns a process exit code."""
     config: Config = build_config(args)
@@ -180,6 +205,10 @@ def run(args: argparse.Namespace) -> int:
         )
 
     course_ids = _resolve_course_ids(client, args, info)
+
+    if args.write_vocab:
+        _write_course_vocab(client, course_ids, args.write_vocab)
+
     links = scrape_courses(client, course_ids, config.panopto_host, config.jobs)
     urls = [link.url for link in links]
 

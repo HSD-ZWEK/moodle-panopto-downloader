@@ -157,6 +157,7 @@ Verfügung:
 | `--dry-run` | Titel und ungefähre Größen via yt-dlp ermitteln, ohne herunterzuladen. |
 | `--since DATUM` | Nur Videos ab Upload-Datum laden (`JJJJ-MM-TT`); an yt-dlp übergeben. |
 | `--write-urls DATEI` | Gefundene URLs in eine Datei schreiben. |
+| `--write-vocab DATEI` | Aus dem/den Kurs(en) ein deutsches Fachvokabular ableiten und in DATEI schreiben. |
 | `--out ORDNER` | Zielordner (Vorgabe `downloads`). |
 | `--id-filenames` | Dateien nach Panopto-ID benennen (Provenienz für Transkriptions-Tools). |
 | `--browser NAME` | Browser für die Panopto-Cookies. |
@@ -197,7 +198,18 @@ moodle-panopto-downloader 210 --dry-run
 
 # Nur Videos ab einem Datum herunterladen:
 moodle-panopto-downloader 210 --since 2024-10-01
+
+# In einem Schritt ID-benannt herunterladen und ein Kurs-Vokabular ableiten, dann mit
+# dem Schwesterwerkzeug transkribieren — die Erkennung wird auf die Terminologie des
+# Kurses selbst ausgerichtet:
+moodle-panopto-downloader 210 --id-filenames --write-vocab vocab_210.txt --out videos
+whisper-transcribe-de ./videos --vocab vocab_210.txt --out transcripts
 ```
+
+Das Vokabular wird aus dem Kurs selbst abgeleitet (Abschnitts-/Aktivitätsnamen, Labels,
+Seiteninhalte, Zusammenfassungen). So ist die Transkription auf *diesen Kurs*
+zugeschnitten statt auf ein generisches Modell — genau der Sinn, diese Werkzeuge für die
+eigenen Moodle-Kurse einzusetzen.
 
 ### Funktionsweise
 
