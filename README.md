@@ -255,9 +255,9 @@ person.
 
 ## Project Background
 
-This software was developed at Hochschule Düsseldorf (University of Applied Sciences)
-by ZWEK – Centre for Training and Competence Development (Zentrum für Weiterbildung und
-Kompetenzentwicklung) within the KIVi-Azubi research project.
+This software was developed at Hochschule Düsseldorf – University of Applied Sciences
+(HSD for short) by ZWEK – Centre for Training and Competence Development within the
+KIVi-Azubi research project.
 
 ```
 Copyright (c) Hochschule Düsseldorf – University of Applied Sciences
@@ -267,8 +267,8 @@ Developed within the KIVi-Azubi research project
 
 ## Research Context
 
-The tool was developed within the KIVi-Azubi research project at Hochschule Düsseldorf
-(University of Applied Sciences), ZWEK – Centre for Training and Competence Development.
+The tool was developed within the KIVi-Azubi research project at Hochschule Düsseldorf –
+University of Applied Sciences, ZWEK – Centre for Training and Competence Development.
 The project conducts a media-pedagogical analysis of digital teaching and learning
 infrastructures — Moodle courses, parametric STACK quizzes, interactive simulations and
 Panopto videos — and derives recommendations for teaching, support, and the targeted use

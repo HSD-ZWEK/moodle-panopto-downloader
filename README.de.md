@@ -260,21 +260,19 @@ Nutzung liegt bei der ausführenden Person.
 
 ## Projekthintergrund
 
-Diese Software wurde an der Hochschule Düsseldorf (University of Applied Sciences) durch
-ZWEK – Centre for Training and Competence Development (Zentrum für Weiterbildung und
-Kompetenzentwicklung) im Forschungsprojekt KIVi-Azubi entwickelt.
+Diese Software wurde an der Hochschule Düsseldorf durch ZWEK – Zentrum für Weiterbildung
+und Kompetenzentwicklung im Forschungsprojekt KIVi-Azubi entwickelt.
 
 ```
-Copyright (c) Hochschule Düsseldorf – University of Applied Sciences
-ZWEK – Centre for Training and Competence Development
-Developed within the KIVi-Azubi research project
+Copyright (c) Hochschule Düsseldorf
+ZWEK – Zentrum für Weiterbildung und Kompetenzentwicklung
+Entwickelt im Forschungsprojekt KIVi-Azubi
 ```
 
 ## Forschungskontext
 
-Das Werkzeug wurde im Forschungsprojekt KIVi-Azubi an der Hochschule Düsseldorf
-(University of Applied Sciences), ZWEK – Centre for Training and Competence Development,
-entwickelt. Das Projekt führt eine medienpädagogische Analyse digitaler
+Das Werkzeug wurde im Forschungsprojekt KIVi-Azubi an der Hochschule Düsseldorf, ZWEK –
+Zentrum für Weiterbildung und Kompetenzentwicklung, entwickelt. Das Projekt führt eine medienpädagogische Analyse digitaler
 Lehr-/Lerninfrastrukturen durch — Moodle-Kurse, parametrische STACK-Quizze, interaktive
 Simulationen und Panopto-Videos — und leitet Empfehlungen für Lehre, Support und den
 gezielten Einsatz von KI und VR dort ab, wo ein echter didaktischer Mehrwert entsteht.
@@ -306,8 +304,8 @@ APA:
 
 ```
 Steier, C.-M. (2026). moodle-panopto-downloader (Version 1.0.0) [Software].
-ZWEK – Centre for Training and Competence Development, Hochschule Düsseldorf –
-University of Applied Sciences. https://github.com/HSD-ZWEK/moodle-panopto-downloader
+ZWEK – Zentrum für Weiterbildung und Kompetenzentwicklung, Hochschule Düsseldorf.
+https://github.com/HSD-ZWEK/moodle-panopto-downloader
 ```
 
 BibTeX:
@@ -318,8 +316,8 @@ BibTeX:
   title     = {moodle-panopto-downloader},
   version   = {1.0.0},
   year      = {2026},
-  publisher = {ZWEK -- Centre for Training and Competence Development,
-               Hochschule D\"usseldorf -- University of Applied Sciences},
+  publisher = {ZWEK -- Zentrum f\"ur Weiterbildung und Kompetenzentwicklung,
+               Hochschule D\"usseldorf},
   url       = {https://github.com/HSD-ZWEK/moodle-panopto-downloader},
   note      = {Developed within the KIVi-Azubi research project}
   % doi     = {10.5281/zenodo.0000000}  % nach Zenodo-Archivierung ergänzen
