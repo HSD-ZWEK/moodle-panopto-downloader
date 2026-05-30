@@ -4,15 +4,15 @@
 # Developed within the KIVi-Azubi research project
 """Derive a German domain vocabulary from a Moodle course's contents.
 
-The vocabulary is harvested from the text the Web Services API already returns
+The vocabulary is harvested from the text the Web Services API returns
 (``core_course_get_contents``): section and activity names, labels, page content,
-section summaries, resource and link names. Capitalised German terms are ranked by
-frequency, with generic scaffolding words removed. The result feeds the ``--vocab``
-option of whisper-transcribe-de, so transcription is biased towards the terminology
-of the very course being processed.
+section summaries, resource and link names — and, optionally, the text of attached
+PDF/text files. Terms are matched case-insensitively (so lower-case technical adjectives
+such as ``isotherm``/``isobar`` are captured), ranked by frequency, with German function
+words and Moodle scaffolding removed. The result feeds ``whisper-transcribe-de --vocab``.
 
-This is pure with respect to the network: :func:`extract_terms` works on the decoded
-API structure and contains no I/O.
+:func:`extract_terms`, :func:`iter_file_urls` and :func:`text_from_file` are pure with
+respect to the network (no I/O); downloading files is done by the caller.
 """
 
 from __future__ import annotations
@@ -20,138 +20,434 @@ from __future__ import annotations
 import html
 import re
 from collections import Counter
+from collections.abc import Iterable
 from typing import Any
 
 from .panopto import iter_strings
 
 _RE_TAG = re.compile(r"<[^>]+>")
 _RE_URL = re.compile(r"https?://\S+|www\.\S+")
-# Capitalised German word, >= 4 letters (nouns and proper terms).
-_RE_WORD = re.compile(r"\b[A-ZÄÖÜ][A-Za-zÄÖÜäöüß]{3,}\b")
+# Any German word, >= 4 letters (case-insensitive: nouns, adjectives, terms).
+_RE_WORD = re.compile(r"\b[A-Za-zÄÖÜäöüß]{4,}\b")
 
-# Generic words to drop: German function words (capitalised at sentence start),
-# Moodle/quiz scaffolding, and common filler. Domain terms are kept.
-_STOP = {
-    "Aufgabe",
-    "Aufgaben",
-    "Frage",
-    "Fragen",
-    "Quiz",
-    "Test",
-    "Tests",
-    "Material",
-    "Materialien",
-    "Datei",
-    "Dateien",
-    "Abschnitt",
-    "Thema",
-    "Themen",
-    "Kurs",
-    "Kurse",
-    "Lernpaket",
-    "Lerneinheit",
-    "Video",
-    "Videos",
-    "Ordner",
-    "Link",
-    "Links",
-    "Seite",
-    "Seiten",
-    "Inhalt",
-    "Inhalte",
-    "Übung",
-    "Übungen",
-    "Lösung",
-    "Lösungen",
-    "Beispiel",
-    "Beispiele",
-    "Hinweis",
-    "Hinweise",
-    "Einführung",
-    "Überblick",
-    "Zusammenfassung",
-    "Hier",
-    "Diese",
-    "Dieser",
-    "Dieses",
-    "Damit",
-    "Dabei",
-    "Außerdem",
-    "Somit",
-    "Also",
-    "Wenn",
-    "Dann",
-    "Weil",
-    "Sodass",
-    "Welche",
-    "Welcher",
-    "Welches",
-    "Warum",
-    "Wann",
-    "Bitte",
-    "Achtung",
-    "Tipp",
-    "Tipps",
-    "Klausur",
-    "Probeklausur",
-    "Semester",
-    "Punkte",
-    "Eine",
-    "Einen",
-    "Eines",
-    "Einem",
-    "Einer",
-    "Wikimedia",
-    "Commons",
-    "Quelle",
-    "Autor",
-    "Gecheckt",
-    "Ausprobieren",
-    "Tricks",
-    "Eingeben",
-    "Vorwissen",
-    "Gefühl",
-    "Einstieg",
-    # Panopto / Moodle plumbing that may survive URL stripping.
-    "Panopto",
-    "Sessions",
-    "Pages",
-    "Viewer",
-    "Embed",
-    "Download",
-    "Online",
-    "URLs",
-    "Medienfeld",
-    "Selbsttest",
-    "Unterabschnitt",
-    "Unterabschnitte",
-    "Erklärung",
-    "Erklärungen",
-    "Bestehensgrenze",
-    "Bestehen",
-    "Text",
-    "Keine",
-    "Panik",
-    "Geöffnet",
-    "Geschlossen",
+# Moodle/quiz scaffolding and Panopto/plumbing words.
+_SCAFFOLD = {
+    "aufgabe",
+    "aufgaben",
+    "frage",
+    "fragen",
+    "quiz",
+    "test",
+    "tests",
+    "material",
+    "materialien",
+    "datei",
+    "dateien",
+    "abschnitt",
+    "thema",
+    "themen",
+    "kurs",
+    "kurse",
+    "lernpaket",
+    "lerneinheit",
+    "video",
+    "videos",
+    "ordner",
+    "link",
+    "links",
+    "seite",
+    "seiten",
+    "inhalt",
+    "inhalte",
+    "übung",
+    "übungen",
+    "lösung",
+    "lösungen",
+    "beispiel",
+    "beispiele",
+    "hinweis",
+    "hinweise",
+    "einführung",
+    "überblick",
+    "zusammenfassung",
+    "bitte",
+    "achtung",
+    "tipp",
+    "tipps",
+    "klausur",
+    "probeklausur",
+    "semester",
+    "punkte",
+    "wikimedia",
+    "commons",
+    "quelle",
+    "autor",
+    "gecheckt",
+    "ausprobieren",
+    "tricks",
+    "eingeben",
+    "vorwissen",
+    "einstieg",
+    "panopto",
+    "sessions",
+    "pages",
+    "viewer",
+    "embed",
+    "download",
+    "online",
+    "urls",
+    "medienfeld",
+    "selbsttest",
+    "unterabschnitt",
+    "unterabschnitte",
+    "erklärung",
+    "erklärungen",
+    "bestehensgrenze",
+    "bestehen",
+    "text",
+    "panik",
+    "geöffnet",
+    "geschlossen",
+    "lernvideos",
+    "literatur",
+    "bibliothek",
+    "verzeichnisse",
+    "direktlink",
+    "bonuspunkte",
+    "relevant",
+    # HTML/CSS/file-format tokens that survive in page or file text.
+    "content",
+    "application",
+    "display",
+    "true",
+    "false",
+    "file",
+    "files",
+    "filtericon",
+    "version",
+    "style",
+    "class",
+    "href",
+    "span",
+    "html",
+    "http",
+    "https",
+    "www",
+    "folie",
+    "folien",
+    "slide",
+    "none",
+    "block",
+    "width",
+    "height",
+    # English title-page / affiliation boilerplate.
+    "prof",
+    "university",
+    "applied",
+    "sciences",
+    "hochschule",
+    "fachhochschule",
 }
 
+# Common German function words and generic content words (not domain terminology).
+_GERMAN_STOP = {
+    "aber",
+    "alle",
+    "allem",
+    "allen",
+    "aller",
+    "alles",
+    "als",
+    "also",
+    "andere",
+    "anderen",
+    "auch",
+    "auf",
+    "aus",
+    "bei",
+    "beide",
+    "beiden",
+    "bereits",
+    "besonders",
+    "bzw",
+    "dabei",
+    "dadurch",
+    "dafür",
+    "daher",
+    "damit",
+    "danach",
+    "dann",
+    "daran",
+    "darauf",
+    "daraus",
+    "darin",
+    "darüber",
+    "darum",
+    "dass",
+    "davon",
+    "dazu",
+    "dein",
+    "denn",
+    "der",
+    "deren",
+    "des",
+    "deshalb",
+    "dessen",
+    "deswegen",
+    "dich",
+    "die",
+    "dies",
+    "diese",
+    "diesem",
+    "diesen",
+    "dieser",
+    "dieses",
+    "doch",
+    "dort",
+    "durch",
+    "eben",
+    "ebenfalls",
+    "ebenso",
+    "ein",
+    "eine",
+    "einem",
+    "einen",
+    "einer",
+    "eines",
+    "einige",
+    "einigen",
+    "einiger",
+    "entsprechend",
+    "entsprechende",
+    "entsprechenden",
+    "etwa",
+    "etwas",
+    "folgende",
+    "folgenden",
+    "folgendes",
+    "für",
+    "ganz",
+    "ganze",
+    "ganzen",
+    "geben",
+    "gegeben",
+    "gegen",
+    "genau",
+    "gerade",
+    "gibt",
+    "groß",
+    "große",
+    "großen",
+    "gut",
+    "gute",
+    "guten",
+    "haben",
+    "hast",
+    "hatte",
+    "hatten",
+    "heißt",
+    "hier",
+    "hierbei",
+    "hoch",
+    "hohe",
+    "ihm",
+    "ihn",
+    "ihnen",
+    "ihr",
+    "ihre",
+    "ihrem",
+    "ihren",
+    "ihrer",
+    "immer",
+    "indem",
+    "innerhalb",
+    "insbesondere",
+    "ist",
+    "jede",
+    "jedem",
+    "jeden",
+    "jeder",
+    "jedes",
+    "jedoch",
+    "jeweils",
+    "jeweilige",
+    "jeweiligen",
+    "kann",
+    "kein",
+    "keine",
+    "keinen",
+    "können",
+    "könnte",
+    "lassen",
+    "machen",
+    "man",
+    "mehr",
+    "mein",
+    "meist",
+    "meistens",
+    "mit",
+    "möchte",
+    "möglich",
+    "mögliche",
+    "möglichen",
+    "muss",
+    "müssen",
+    "nach",
+    "nachdem",
+    "neben",
+    "nicht",
+    "nichts",
+    "noch",
+    "nun",
+    "nur",
+    "oben",
+    "ober",
+    "obwohl",
+    "oder",
+    "ohne",
+    "schon",
+    "sehr",
+    "sein",
+    "seine",
+    "seinen",
+    "seiner",
+    "selbst",
+    "sich",
+    "sind",
+    "soll",
+    "sollen",
+    "sollte",
+    "somit",
+    "sondern",
+    "sonst",
+    "sowie",
+    "sowohl",
+    "über",
+    "überhaupt",
+    "übrigens",
+    "und",
+    "uns",
+    "unser",
+    "unter",
+    "unterschiedliche",
+    "verschiedene",
+    "verschiedenen",
+    "viel",
+    "viele",
+    "vielen",
+    "vom",
+    "von",
+    "vor",
+    "während",
+    "war",
+    "waren",
+    "warum",
+    "was",
+    "weil",
+    "weiter",
+    "weitere",
+    "weiteren",
+    "welche",
+    "welchem",
+    "welchen",
+    "welcher",
+    "welches",
+    "wenig",
+    "wenige",
+    "weniger",
+    "wenn",
+    "werden",
+    "wie",
+    "wieder",
+    "wird",
+    "wirklich",
+    "wirst",
+    "wobei",
+    "wodurch",
+    "wollen",
+    "wollte",
+    "worden",
+    "wurde",
+    "wurden",
+    "würde",
+    "würden",
+    "zeigen",
+    "zeigt",
+    "zudem",
+    "zum",
+    "zur",
+    "zusammen",
+    "zwar",
+    "zwischen",
+}
 
-def extract_terms(data: Any, max_terms: int = 200, min_count: int = 1) -> list[str]:
-    """Return candidate domain terms from a ``core_course_get_contents`` structure.
+_STOP_FOLDED = {w.casefold() for w in _SCAFFOLD | _GERMAN_STOP}
 
-    Terms are capitalised German words ranked by frequency (descending), with generic
-    scaffolding words removed. ``max_terms`` caps the list; ``min_count`` drops rare
-    one-offs when raised.
+# File types worth reading for vocabulary (others are skipped).
+TEXT_SUFFIXES = (".pdf", ".txt", ".md", ".csv", ".html", ".htm")
+
+
+def extract_terms(
+    data: Any,
+    extra_texts: Iterable[str] | None = None,
+    *,
+    max_terms: int = 250,
+    min_count: int = 1,
+) -> list[str]:
+    """Return candidate domain terms from a course-contents structure (+ extra texts).
+
+    Words are matched case-insensitively and counts merged across cases; the most
+    frequent surface form is kept (so a noun stays capitalised, an adjective stays
+    lower-case). German function words and Moodle scaffolding are removed. ``max_terms``
+    caps the list; ``min_count`` drops rare one-offs when raised.
     """
-    counts: Counter[str] = Counter()
-    for text in iter_strings(data):
+    fold_counts: Counter[str] = Counter()
+    surfaces: dict[str, Counter[str]] = {}
+    streams: Iterable[str] = iter_strings(data)
+    if extra_texts is not None:
+        streams = (*streams, *extra_texts)
+    for text in streams:
         cleaned = html.unescape(_RE_TAG.sub(" ", _RE_URL.sub(" ", text)))
         for word in _RE_WORD.findall(cleaned):
-            if word not in _STOP:
-                counts[word] += 1
-    ranked = [w for w, c in counts.most_common() if c >= min_count]
-    return ranked[:max_terms]
+            fold = word.casefold()
+            if fold in _STOP_FOLDED:
+                continue
+            fold_counts[fold] += 1
+            surfaces.setdefault(fold, Counter())[word] += 1
+    ranked = [fold for fold, count in fold_counts.most_common() if count >= min_count]
+    terms = [surfaces[fold].most_common(1)[0][0] for fold in ranked]
+    return terms[:max_terms]
+
+
+def iter_file_urls(data: Any) -> list[tuple[str, str]]:
+    """Return ``(fileurl, filename)`` for readable file resources in course contents."""
+    found: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for section in data if isinstance(data, list) else []:
+        for module in section.get("modules", []):
+            for content in module.get("contents", []) or []:
+                url = content.get("fileurl")
+                name = content.get("filename") or ""
+                if url and url not in seen and name.lower().endswith(TEXT_SUFFIXES):
+                    seen.add(url)
+                    found.append((url, name))
+    return found
+
+
+def text_from_file(filename: str, data: bytes) -> str:
+    """Extract plain text from a downloaded file (PDF via pypdf; text/HTML decoded)."""
+    lower = filename.lower()
+    if lower.endswith(".pdf"):
+        import io
+
+        import pypdf
+
+        reader = pypdf.PdfReader(io.BytesIO(data))
+        return "\n".join((page.extract_text() or "") for page in reader.pages)
+    text = data.decode("utf-8", errors="replace")
+    if lower.endswith((".html", ".htm")):
+        text = _RE_TAG.sub(" ", text)
+    return text
 
 
 def render_vocab_file(terms: list[str], courses: list[int]) -> str:

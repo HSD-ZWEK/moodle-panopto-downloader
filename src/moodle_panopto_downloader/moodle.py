@@ -100,3 +100,14 @@ class MoodleClient:
     def get_course_ltis(self, courseid: int) -> Any:
         """Return LTI (external tool) instances of a course."""
         return self.call("mod_lti_get_ltis_by_courses", **{"courseids[0]": courseid})
+
+    def fetch_file(self, fileurl: str) -> bytes:
+        """Download a course file via its token-authenticated pluginfile URL."""
+        sep = "&" if "?" in fileurl else "?"
+        url = f"{fileurl}{sep}token={self._token}"
+        try:
+            response = self._session.get(url, timeout=self.timeout)
+            response.raise_for_status()
+        except requests.RequestException as exc:
+            raise MoodleConnectionError(f"File download failed: {exc}") from exc
+        return response.content

@@ -21,7 +21,7 @@ from .errors import MoodleAPIError, MoodlePanoptoError
 from .moodle import MoodleClient
 from .panopto import PanoptoLink, extract_links
 from .utils import configure_logging, get_logger
-from .vocab import extract_terms, render_vocab_file
+from .vocab import extract_terms, iter_file_urls, render_vocab_file, text_from_file
 
 _log = get_logger()
 
@@ -69,6 +69,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--write-vocab",
         metavar="FILE",
         help="Derive a German domain vocabulary from the course(s) and write it to FILE.",
+    )
+    parser.add_argument(
+        "--vocab-from-files",
+        action="store_true",
+        help="Also read attached PDF/text files for the vocabulary (needs the 'pdf' extra).",
     )
     parser.add_argument("--out", help="Download directory (default: downloads).")
     parser.add_argument(
@@ -167,7 +172,30 @@ def links_to_json(links: Sequence[PanoptoLink]) -> str:
     )
 
 
-def _write_course_vocab(client: MoodleClient, course_ids: list[int], path: str) -> None:
+def _collect_file_text(client: MoodleClient, contents: Any) -> list[str]:
+    """Download and extract text from a course's PDF/text file resources."""
+    texts: list[str] = []
+    pdf_warned = False
+    for url, name in iter_file_urls(contents):
+        try:
+            data = client.fetch_file(url)
+        except MoodlePanoptoError as exc:
+            _log.debug("Vocabulary: skip file %s: %s", name, exc)
+            continue
+        try:
+            texts.append(text_from_file(name, data))
+        except ImportError:
+            if not pdf_warned:
+                _log.warning("Reading PDFs needs pypdf: pip install '.[pdf]'. Skipping PDFs.")
+                pdf_warned = True
+        except Exception as exc:  # noqa: BLE001 - tolerate any unreadable file
+            _log.debug("Vocabulary: unreadable file %s: %s", name, exc)
+    return texts
+
+
+def _write_course_vocab(
+    client: MoodleClient, course_ids: list[int], path: str, from_files: bool
+) -> None:
     """Derive a domain vocabulary from the courses' contents and write it to ``path``."""
     terms: list[str] = []
     seen: set[str] = set()
@@ -177,7 +205,10 @@ def _write_course_vocab(client: MoodleClient, course_ids: list[int], path: str) 
         except MoodlePanoptoError as exc:
             _log.error("Vocabulary: course %s: %s", cid, exc)
             continue
-        for term in extract_terms(contents):
+        extra = _collect_file_text(client, contents) if from_files else None
+        if extra:
+            _log.info("Course %s: read %d file(s) for vocabulary.", cid, len(extra))
+        for term in extract_terms(contents, extra):
             key = term.casefold()
             if key not in seen:
                 seen.add(key)
@@ -207,7 +238,7 @@ def run(args: argparse.Namespace) -> int:
     course_ids = _resolve_course_ids(client, args, info)
 
     if args.write_vocab:
-        _write_course_vocab(client, course_ids, args.write_vocab)
+        _write_course_vocab(client, course_ids, args.write_vocab, args.vocab_from_files)
 
     links = scrape_courses(client, course_ids, config.panopto_host, config.jobs)
     urls = [link.url for link in links]

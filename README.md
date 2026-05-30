@@ -155,6 +155,7 @@ Downloading requires an authenticated Panopto session. Two methods are available
 | `--since DATE` | Only download videos uploaded on/after DATE (`YYYY-MM-DD`); passed to yt-dlp. |
 | `--write-urls FILE` | Write the discovered URLs to a file. |
 | `--write-vocab FILE` | Derive a German domain vocabulary from the course(s) and write it to FILE. |
+| `--vocab-from-files` | Also read attached PDF/text files for the vocabulary (needs `pip install ".[pdf]"`). |
 | `--out DIR` | Output directory (default `downloads`). |
 | `--id-filenames` | Name files by Panopto id (enables provenance for transcription tools). |
 | `--browser NAME` | Browser for the Panopto cookies. |
@@ -204,7 +205,9 @@ whisper-transcribe-de ./videos --vocab vocab_210.txt --out transcripts
 
 The vocabulary is derived from the course itself (section/activity names, labels, page
 content, summaries), so transcription is tuned to *that course* rather than to a generic
-model — the point of using these tools for one's own Moodle courses.
+model — the point of using these tools for one's own Moodle courses. Adding
+`--vocab-from-files` (with `pip install ".[pdf]"`) also mines the course's attached
+PDF/text materials, which yields a richer, denser vocabulary.
 
 ### How it works
 

@@ -158,6 +158,7 @@ Verfügung:
 | `--since DATUM` | Nur Videos ab Upload-Datum laden (`JJJJ-MM-TT`); an yt-dlp übergeben. |
 | `--write-urls DATEI` | Gefundene URLs in eine Datei schreiben. |
 | `--write-vocab DATEI` | Aus dem/den Kurs(en) ein deutsches Fachvokabular ableiten und in DATEI schreiben. |
+| `--vocab-from-files` | Auch angehängte PDF-/Textdateien fürs Vokabular lesen (braucht `pip install ".[pdf]"`). |
 | `--out ORDNER` | Zielordner (Vorgabe `downloads`). |
 | `--id-filenames` | Dateien nach Panopto-ID benennen (Provenienz für Transkriptions-Tools). |
 | `--browser NAME` | Browser für die Panopto-Cookies. |
@@ -209,7 +210,9 @@ whisper-transcribe-de ./videos --vocab vocab_210.txt --out transcripts
 Das Vokabular wird aus dem Kurs selbst abgeleitet (Abschnitts-/Aktivitätsnamen, Labels,
 Seiteninhalte, Zusammenfassungen). So ist die Transkription auf *diesen Kurs*
 zugeschnitten statt auf ein generisches Modell — genau der Sinn, diese Werkzeuge für die
-eigenen Moodle-Kurse einzusetzen.
+eigenen Moodle-Kurse einzusetzen. Mit `--vocab-from-files` (plus `pip install ".[pdf]"`)
+werden zusätzlich die angehängten PDF-/Textmaterialien ausgewertet — das liefert ein
+reichhaltigeres, dichteres Vokabular.
 
 ### Funktionsweise
 
