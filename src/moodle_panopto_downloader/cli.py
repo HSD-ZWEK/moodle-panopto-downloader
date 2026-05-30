@@ -21,7 +21,14 @@ from .errors import MoodleAPIError, MoodlePanoptoError
 from .moodle import MoodleClient
 from .panopto import PanoptoLink, extract_links
 from .utils import configure_logging, get_logger
-from .vocab import extract_terms, iter_file_urls, render_vocab_file, text_from_file
+from .vocab import (
+    extract_terms,
+    iter_file_urls,
+    iter_question_entry_ids,
+    render_vocab_file,
+    text_from_file,
+    text_from_question_xml,
+)
 
 _log = get_logger()
 
@@ -74,6 +81,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--vocab-from-files",
         action="store_true",
         help="Also read attached PDF/text files for the vocabulary (needs the 'pdf' extra).",
+    )
+    parser.add_argument(
+        "--vocab-from-questions",
+        action="store_true",
+        help="Also read quiz question text via qbank_gitsync (needs that plugin + rights).",
     )
     parser.add_argument("--out", help="Download directory (default: downloads).")
     parser.add_argument(
@@ -193,8 +205,53 @@ def _collect_file_text(client: MoodleClient, contents: Any) -> list[str]:
     return texts
 
 
+def _collect_question_text(client: MoodleClient, contents: Any) -> list[str]:
+    """Read quiz question text via qbank_gitsync (plugin-gated, degrades gracefully)."""
+    if not client.supports_gitsync():
+        _log.warning("qbank_gitsync not available for this token; skipping --vocab-from-questions.")
+        return []
+    version = client.gitsync_server_version()
+    if not version:
+        _log.warning("Could not determine qbank_gitsync version; skipping questions.")
+        return []
+    texts: list[str] = []
+    modules = [
+        m
+        for section in (contents if isinstance(contents, list) else [])
+        for m in section.get("modules", [])
+        if m.get("modname") in ("quiz", "qbank")
+    ]
+    for module in modules:
+        cmid = module.get("id")
+        if cmid is None:
+            continue
+        try:
+            listing = client.get_question_list(int(cmid), version, module.get("name", ""))
+        except MoodlePanoptoError as exc:
+            _log.debug("Vocabulary: module %s questions skipped: %s", module.get("name"), exc)
+            continue
+        for entry_id in iter_question_entry_ids(listing):
+            try:
+                exported = client.export_question(entry_id)
+            except MoodlePanoptoError as exc:
+                _log.debug("Vocabulary: question %s skipped: %s", entry_id, exc)
+                continue
+            xml = (
+                next((v for v in exported.values() if isinstance(v, str) and "<" in v), "")
+                if isinstance(exported, dict)
+                else ""
+            )
+            if xml:
+                texts.append(text_from_question_xml(xml))
+    return texts
+
+
 def _write_course_vocab(
-    client: MoodleClient, course_ids: list[int], path: str, from_files: bool
+    client: MoodleClient,
+    course_ids: list[int],
+    path: str,
+    from_files: bool,
+    from_questions: bool,
 ) -> None:
     """Derive a domain vocabulary from the courses' contents and write it to ``path``."""
     terms: list[str] = []
@@ -205,9 +262,17 @@ def _write_course_vocab(
         except MoodlePanoptoError as exc:
             _log.error("Vocabulary: course %s: %s", cid, exc)
             continue
-        extra = _collect_file_text(client, contents) if from_files else None
-        if extra:
-            _log.info("Course %s: read %d file(s) for vocabulary.", cid, len(extra))
+        extra: list[str] = []
+        if from_files:
+            files = _collect_file_text(client, contents)
+            if files:
+                _log.info("Course %s: read %d file(s) for vocabulary.", cid, len(files))
+            extra += files
+        if from_questions:
+            questions = _collect_question_text(client, contents)
+            if questions:
+                _log.info("Course %s: read %d question(s) for vocabulary.", cid, len(questions))
+            extra += questions
         for term in extract_terms(contents, extra):
             key = term.casefold()
             if key not in seen:
@@ -238,7 +303,9 @@ def run(args: argparse.Namespace) -> int:
     course_ids = _resolve_course_ids(client, args, info)
 
     if args.write_vocab:
-        _write_course_vocab(client, course_ids, args.write_vocab, args.vocab_from_files)
+        _write_course_vocab(
+            client, course_ids, args.write_vocab, args.vocab_from_files, args.vocab_from_questions
+        )
 
     links = scrape_courses(client, course_ids, config.panopto_host, config.jobs)
     urls = [link.url for link in links]

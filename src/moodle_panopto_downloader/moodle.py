@@ -16,12 +16,16 @@ The client is intentionally small and defensive:
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 import requests
 
 from .errors import MoodleAPIError, MoodleConnectionError
 from .utils import get_logger
+
+# qbank_gitsync echoes its version in a version-mismatch error message.
+_GITSYNC_VERSION_RE = re.compile(r"installed in Moodle \(([^)]+)\)")
 
 _log = get_logger()
 
@@ -111,3 +115,62 @@ class MoodleClient:
         except requests.RequestException as exc:
             raise MoodleConnectionError(f"File download failed: {exc}") from exc
         return response.content
+
+    # -- qbank_gitsync question export (optional plugin) ---------------------
+    def supports_gitsync(self) -> bool:
+        """Whether the token can list and export questions via qbank_gitsync."""
+        return self.has("qbank_gitsync_get_question_list") and self.has(
+            "qbank_gitsync_export_question"
+        )
+
+    def gitsync_server_version(self) -> str | None:
+        """Detect the server's qbank_gitsync version.
+
+        qbank_gitsync requires the caller to send a matching ``localversion``. A
+        deliberate mismatch makes it echo its own version in the error message, which we
+        parse — so no hard-coded version is needed.
+        """
+        try:
+            self.call(
+                "qbank_gitsync_get_question_list",
+                localversion="0",
+                contextlevel="50",
+                instanceid="0",
+                qcategoryname="top",
+                coursename="",
+                modulename="",
+                coursecategory="",
+                qcategoryid="",
+                contextonly=1,
+                ignorecat="",
+                **{"qbankentryids[0]": ""},
+            )
+        except MoodleAPIError as exc:
+            match = _GITSYNC_VERSION_RE.search(str(exc))
+            return match.group(1) if match else None
+        return None
+
+    def get_question_list(self, cmid: int, version: str, modulename: str = "") -> Any:
+        """List questions of a module's question bank (context level 70)."""
+        return self.call(
+            "qbank_gitsync_get_question_list",
+            contextlevel="70",
+            instanceid=str(cmid),
+            localversion=version,
+            qcategoryname="top",
+            coursename="",
+            modulename=modulename,
+            coursecategory="",
+            qcategoryid="",
+            contextonly=0,
+            ignorecat="",
+            **{"qbankentryids[0]": ""},
+        )
+
+    def export_question(self, questionbankentryid: str) -> Any:
+        """Export one question (Moodle XML, including its text)."""
+        return self.call(
+            "qbank_gitsync_export_question",
+            questionbankentryid=str(questionbankentryid),
+            includecategory=0,
+        )

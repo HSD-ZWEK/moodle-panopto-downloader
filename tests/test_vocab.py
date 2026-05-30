@@ -5,8 +5,10 @@ from __future__ import annotations
 from moodle_panopto_downloader.vocab import (
     extract_terms,
     iter_file_urls,
+    iter_question_entry_ids,
     render_vocab_file,
     text_from_file,
+    text_from_question_xml,
 )
 
 
@@ -83,6 +85,37 @@ def test_iter_file_urls_filters_by_suffix():
 def test_text_from_file_text_and_html():
     assert "Wärme" in text_from_file("a.txt", "Wärme".encode())
     assert text_from_file("a.html", b"<b>Enthalpie</b>").strip() == "Enthalpie"
+
+
+def test_text_from_question_xml():
+    xml = (
+        '<question type="stack"><name><text>Q1</text></name>'
+        '<questiontext format="html"><text><![CDATA[<p>Berechne die <b>Enthalpie</b>.</p>]]></text>'
+        "</questiontext>"
+        "<generalfeedback><text>Die Zustandsgleichung gilt.</text></generalfeedback></question>"
+    )
+    out = text_from_question_xml(xml)
+    assert "Enthalpie" in out
+    assert "Zustandsgleichung" in out
+    assert "<" not in out  # tags and CDATA stripped
+
+
+def test_iter_question_entry_ids_dedup_and_order():
+    data = {
+        "questions": [
+            {"questionbankentryid": 12},
+            {"questionbankentryid": "7"},
+            {"questionbankentryid": 12},
+        ]
+    }
+    assert iter_question_entry_ids(data) == ["12", "7"]
+
+
+def test_question_text_feeds_extract_terms():
+    xml = "<question><questiontext><text>Volumenänderungsarbeit Volumenänderungsarbeit</text>"
+    xml += "</questiontext></question>"
+    terms = extract_terms({"name": "Kurs"}, extra_texts=[text_from_question_xml(xml)])
+    assert "Volumenänderungsarbeit" in terms
 
 
 def test_render_vocab_file():

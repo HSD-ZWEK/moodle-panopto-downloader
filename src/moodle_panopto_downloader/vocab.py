@@ -511,6 +511,42 @@ def text_from_file(filename: str, data: bytes) -> str:
     return text
 
 
+_RE_CDATA = re.compile(r"<!\[CDATA\[(.*?)\]\]>", re.DOTALL)
+_RE_TEXT_NODE = re.compile(r"<text>(.*?)</text>", re.DOTALL | re.IGNORECASE)
+
+
+def text_from_question_xml(xml: str) -> str:
+    """Extract the human-readable text from a Moodle question XML (all ``<text>`` nodes)."""
+    parts: list[str] = []
+    for node in _RE_TEXT_NODE.findall(xml):
+        node = _RE_CDATA.sub(r"\1", node)
+        parts.append(_RE_TAG.sub(" ", html.unescape(node)))
+    return "\n".join(parts)
+
+
+def iter_question_entry_ids(data: Any) -> list[str]:
+    """Collect, in order and de-duplicated, all ``questionbankentryid`` values in ``data``."""
+    ids: list[str] = []
+    seen: set[str] = set()
+
+    def walk(obj: Any) -> None:
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if key == "questionbankentryid" and isinstance(value, (str, int)):
+                    sid = str(value)
+                    if sid not in seen:
+                        seen.add(sid)
+                        ids.append(sid)
+                else:
+                    walk(value)
+        elif isinstance(obj, (list, tuple)):
+            for value in obj:
+                walk(value)
+
+    walk(data)
+    return ids
+
+
 def render_vocab_file(terms: list[str], courses: list[int]) -> str:
     """Render the vocabulary file content (header + one term per line)."""
     ids = ", ".join(str(c) for c in courses)

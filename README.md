@@ -161,6 +161,7 @@ Downloading requires an authenticated Panopto session. Two methods are available
 | `--write-urls FILE` | Write the discovered URLs to a file. |
 | `--write-vocab FILE` | Derive a German domain vocabulary from the course(s) and write it to FILE. |
 | `--vocab-from-files` | Also read attached PDF/text files for the vocabulary (needs `pip install ".[pdf]"`). |
+| `--vocab-from-questions` | Also read quiz question text via the `qbank_gitsync` plugin (optional; see docs). |
 | `--out DIR` | Output directory (default `downloads`). |
 | `--id-filenames` | Name files by Panopto id (enables provenance for transcription tools). |
 | `--browser NAME` | Browser for the Panopto cookies. |

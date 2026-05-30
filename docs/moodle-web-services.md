@@ -192,6 +192,34 @@ moodle-panopto-downloader --all-courses --list --base-url "$BASE" --token-file t
 | Tool `--write-vocab --vocab-from-files` | PASS — 34 files read, 250 terms |
 | Tool `--all-courses` | PASS — processes course 210 |
 
+## Optional: reading quiz question text (`qbank_gitsync`)
+
+`--vocab-from-questions` enriches the vocabulary with the text of quiz questions. Core
+Moodle has **no** web service that exports question-bank text, so this feature depends on
+the third-party **[`qbank_gitsync`](https://github.com/catalyst/moodle-qbank_gitsync)**
+plugin being installed. The tool degrades gracefully (logs a warning and skips) when the
+plugin or the rights are absent.
+
+If you want to enable it, the dedicated service additionally needs:
+
+| Element | Value |
+|---|---|
+| Functions | `qbank_gitsync_get_question_list`, `qbank_gitsync_export_question` |
+| Capabilities | `qbank/gitsync:listquestions`, `qbank/gitsync:exportquestions` (both **read**) |
+| Module access | `mod/qbank:view`, and `moodle/course:viewhiddenactivities` if the question bank module is hidden |
+
+All are read-only and should be granted **scoped to the course** (assign a course-level
+role at the target course context), not system-wide. The tool detects the required
+`localversion` automatically (qbank_gitsync echoes its version in a mismatch error).
+
+> **Known limitation.** `qbank_gitsync` versions for Moodle 4.x can fail to export
+> questions from Moodle 5's shared question-bank modules with `codingerror: Invalid
+> context id`. On such setups `--vocab-from-questions` yields nothing (the tool skips the
+> affected questions); deriving question vocabulary directly from the database remains the
+> reliable route there. Because of this gating and privilege footprint, the dedicated
+> least-privilege account documented above deliberately does **not** include the question
+> functions; enable them only when you specifically need question-text vocabulary.
+
 ## Reducing permissions further
 
 - Drop `core_enrol_get_users_courses` if `--all-courses` is not used.

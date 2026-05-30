@@ -163,6 +163,7 @@ Verfügung:
 | `--write-urls DATEI` | Gefundene URLs in eine Datei schreiben. |
 | `--write-vocab DATEI` | Aus dem/den Kurs(en) ein deutsches Fachvokabular ableiten und in DATEI schreiben. |
 | `--vocab-from-files` | Auch angehängte PDF-/Textdateien fürs Vokabular lesen (braucht `pip install ".[pdf]"`). |
+| `--vocab-from-questions` | Auch Quizfragetext über das `qbank_gitsync`-Plugin lesen (optional; siehe Doku). |
 | `--out ORDNER` | Zielordner (Vorgabe `downloads`). |
 | `--id-filenames` | Dateien nach Panopto-ID benennen (Provenienz für Transkriptions-Tools). |
 | `--browser NAME` | Browser für die Panopto-Cookies. |
